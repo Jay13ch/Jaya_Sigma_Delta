@@ -1,23 +1,112 @@
 /*
- * Copyright (c) 2024 Your Name
- * SPDX-License-Identifier: Apache-2.0
- */
+This file provides the mapping from the Wokwi modules to Verilog HDL.
 
-`default_nettype none
+It's only needed for Wokwi designs.
+*/
 
-module tt_um_example (
-    input  wire       VGND,
-    input  wire       VDPWR,    // 1.8v power supply
-//    input  wire       VAPWR,    // 3.3v power supply
-    input  wire [7:0] ui_in,    // Dedicated inputs
-    output wire [7:0] uo_out,   // Dedicated outputs
-    input  wire [7:0] uio_in,   // IOs: Input path
-    output wire [7:0] uio_out,  // IOs: Output path
-    output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
-    inout  wire [7:0] ua,       // Analog pins, only ua[5:0] can be used
-    input  wire       ena,      // always 1 when the design is powered, so you can ignore it
-    input  wire       clk,      // clock
-    input  wire       rst_n     // reset_n - low to reset
-);
+`define default_netname none
+
+(* keep_hierarchy *)
+module buffer_cell (
+    input wire in,
+    output wire out
+    );
+    assign out = in;
+endmodule
+
+(* keep_hierarchy *)
+module and_cell (
+    input wire a,
+    input wire b,
+    output wire out
+    );
+
+    assign out = a & b;
+endmodule
+
+(* keep_hierarchy *)
+module or_cell (
+    input wire a,
+    input wire b,
+    output wire out
+    );
+
+    assign out = a | b;
+endmodule
+
+(* keep_hierarchy *)
+module xor_cell (
+    input wire a,
+    input wire b,
+    output wire out
+    );
+
+    assign out = a ^ b;
+endmodule
+
+(* keep_hierarchy *)
+module nand_cell (
+    input wire a,
+    input wire b,
+    output wire out
+    );
+
+    assign out = !(a&b);
+endmodule
+
+(* keep_hierarchy *)
+module not_cell (
+    input wire in,
+    output wire out
+    );
+
+    assign out = !in;
+endmodule
+
+(* keep_hierarchy *)
+module mux_cell (
+    input wire a,
+    input wire b,
+    input wire sel,
+    output wire out
+    );
+
+    assign out = sel ? b : a;
+endmodule
+
+(* keep_hierarchy *)
+module dff_cell (
+    input wire clk,
+    input wire d,
+    output reg q,
+    output wire notq
+    );
+
+    assign notq = !q;
+    always @(posedge clk)
+        q <= d;
 
 endmodule
+
+(* keep_hierarchy *)
+module dffsr_cell (
+    input wire clk,
+    input wire d,
+    input wire s,
+    input wire r,
+    output reg q,
+    output wire notq
+    );
+
+    assign notq = !q;
+
+    always @(posedge clk or posedge s or posedge r) begin
+        if (r)
+            q <= 0;
+        else if (s)
+            q <= 1;
+        else
+            q <= d;
+    end
+endmodule
+
